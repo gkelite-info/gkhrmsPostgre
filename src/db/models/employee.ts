@@ -20,6 +20,9 @@ interface employeeAttributes {
     phone?: string | null;
     address?: string | null;
 
+    gender?: string | null;
+    marital_status?: string | null;
+
     dob?: Date | null;
     bloodGroup?: string | null;
     emergencyContact?: string | null;
@@ -53,6 +56,9 @@ class Employee extends Model<employeeAttributes, employeeInput> implements emplo
 
     public phone!: string | null;
     public address!: string | null;
+
+    public gender!: string | null;
+    public marital_status!: string | null;
 
     public dob!: Date | null;
     public bloodGroup!: string | null;
@@ -145,7 +151,14 @@ Employee.init({
         type: DataTypes.STRING(100),
         allowNull: true
     },
-
+    gender: {
+        type: DataTypes.STRING(10),
+        allowNull: true
+    },
+    marital_status: {
+        type: DataTypes.STRING(20),
+        allowNull: true
+    },
 
     emailVerificationToken: {
         type: DataTypes.STRING(255),
