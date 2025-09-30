@@ -33,7 +33,7 @@ class EmployeeProfile extends Model<employeeProfileAttributes, employeeProfileIn
 
 EmployeeProfile.init({
     id: {
-        type: DataTypes.NUMBER,
+        type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
         allowNull: false
