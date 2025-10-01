@@ -20,7 +20,7 @@ interface employeeAttributes {
     phone?: string | null;
     address?: string | null;
 
-    gender?: string | null;
+    gender: string | null;
     marital_status?: string | null;
 
     dob?: Date | null;
