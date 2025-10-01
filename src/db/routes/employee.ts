@@ -3,7 +3,8 @@ import Employee from '../models/employee';
 import bcrypt from 'bcrypt';
 import { generateToken } from '../utils/authRoutes';
 import nodemailer from 'nodemailer';
-import { protectEmployee } from '../../middleware/authMiddleware';
+import { AuthenticatedRequest, protectEmployee } from '../../middleware/authMiddleware';
+import EmployeeEducation from '../models/employeeEducation';
 
 interface OTPRecord {
     otp: number;
@@ -13,10 +14,6 @@ interface OTPRecord {
 const otpStore: Record<string, OTPRecord> = {};
 const employeeRouter = express.Router();
 
-// Extend Request to include employee for middleware
-interface AuthenticatedRequest extends Request {
-    employee?: Employee; // Instance of Sequelize Employee
-}
 
 // -------------------- SEND OTP --------------------
 employeeRouter.post('/send-otp', async (req: Request, res: Response) => {
@@ -140,6 +137,7 @@ employeeRouter.post('/login', async (req: Request, res: Response) => {
                 fullname: employee.fullname,
                 email: employee.email,
                 role: employee.role,
+                photoUrl: employee.photoURL
             },
         });
     } catch (error) {
@@ -238,8 +236,8 @@ employeeRouter.get('/:employeeId', async (req: Request, res: Response) => {
 // -------------------- GET ALL EMPLOYEES --------------------
 employeeRouter.get('/', async (req: Request, res: Response) => {
     try {
-        const employees = await Employee.findAll();
-        res.status(200).json({ message: 'Fetched all employees', employees });
+        const data = await Employee.findAll();
+        res.status(200).json({ message: 'Fetched all employees', data });
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         res.status(500).json({ message });
@@ -298,6 +296,27 @@ employeeRouter.patch('/update-profile/:employeeId', protectEmployee, async (req,
         await employee.save();
 
         res.status(200).json({ message: 'Profile updated successfully', employee });
+    } catch (error) {
+        const message = error instanceof Error ? error.message : String(error);
+        res.status(500).json({ message });
+    }
+});
+
+// -------------------- UPDATE EMPLOYEE LOCATION --------------------
+employeeRouter.patch('/update-location/:employeeId', async (req: Request, res: Response) => {
+    try {
+        const { employeeId } = req.params;
+        const { location } = req.body as { location: string };
+
+        if (!location) return res.status(400).json({ message: 'Location is required' });
+
+        const employee = await Employee.findOne({ where: { employeeId } });
+        if (!employee) return res.status(404).json({ message: 'Employee not found' });
+
+        employee.location = location;
+        await employee.save();
+
+        res.status(200).json({ message: 'Location updated successfully', employee });
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         res.status(500).json({ message });

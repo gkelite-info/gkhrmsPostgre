@@ -1,10 +1,12 @@
 import express from 'express';
 import { protectEmployee } from '../../middleware/authMiddleware';
 import employeeRouter from './employee';
+import employeeEducationRouter from './employeEducation';
 
 const routes = express.Router();
 
 routes.use('/employee', employeeRouter);
+routes.use('/employeeEducation', employeeEducationRouter);
 
 routes.get('/profile', protectEmployee, async (req: any, res) => {
     try {
