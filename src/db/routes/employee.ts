@@ -93,25 +93,71 @@ employeeRouter.get('/profile', protectEmployee, async (req: AuthenticatedRequest
 });
 
 // -------------------- REGISTER --------------------
-employeeRouter.post('/register', async (req: Request, res: Response) => {
+employeeRouter.post("/", async (req: Request, res: Response) => {
     try {
-        const { fullname, email, role } = req.body;
-        if (!fullname || !email || !role) return res.status(400).json({ message: 'All fields required' });
+        const {
+            firstname,
+            lastname,
+            email,
+            password,
+            role,
+            department,
+            designation,
+            managerId,
+            location,
+            dateOfJoining,
+            phone,
+            address,
+            nationality,
+            physicallyHandicapped,
+            gender,
+            marital_status,
+            dob,
+            bloodGroup,
+            emergencyContact,
+        } = req.body;
+
+        if (!firstname || !email || !password) {
+            return res.status(400).json({ message: "firstname, email, and password are required" });
+        }
+
+        const existingEmployee = await Employee.findOne({ where: { email } });
+        if (existingEmployee) {
+            return res.status(400).json({ message: "Email already exists" });
+        }
 
         const tempPassword = 'temp';
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
 
-        const employee = await Employee.create({
-            fullname,
+        const newEmployee = await Employee.create({
+            firstname,
+            lastname,
             email,
-            role,
             password: hashedPassword,
+            role,
+            department,
+            designation,
+            managerId,
+            location,
+            dateOfJoining,
+            phone,
+            address,
+            nationality,
+            physicallyHandicapped,
+            gender,
+            marital_status,
+            dob,
+            bloodGroup,
+            emergencyContact,
         });
 
-        res.status(201).json({ message: 'Employee registered', employee });
+        res.status(201).json({
+            message: "Employee created successfully",
+            employee: newEmployee,
+        });
     } catch (error) {
-        const message = error instanceof Error ? error.message : String(error);
-        res.status(500).json({ message });
+        console.error(error);
+        res.status(500).json({ message: "Server error" });
     }
 });
 
@@ -134,7 +180,7 @@ employeeRouter.post('/login', async (req: Request, res: Response) => {
             token,
             employee: {
                 employeeId: employee.employeeId,
-                fullname: employee.fullname,
+                firstname: employee.firstname,
                 email: employee.email,
                 role: employee.role,
                 photoUrl: employee.photoURL
@@ -164,6 +210,31 @@ employeeRouter.patch('/update-role', async (req: Request, res: Response) => {
         res.status(500).json({ message });
     }
 });
+
+// employeeRouter.patch('/update-personal', async (req: Request, res: Response) => {
+//     try {
+//         const { employeeId, lastname } = req.body as {
+//             employeeId: number;
+//             lastname: string
+//         };
+
+//         if (!employeeId ) {
+//             return res.status(400).json({ message: 'employeeId, marital_status, and gender are required' });
+//         }
+
+//         const employee = await Employee.findOne({ where: { employeeId } });
+//         if (!employee) return res.status(404).json({ message: 'Employee not found' });
+
+//         employee.lastname = lastname
+//         await employee.save();
+
+//         res.status(200).json({ message: 'Employee updated successfully', employee });
+//     } catch (error) {
+//         const message = error instanceof Error ? error.message : String(error);
+//         res.status(500).json({ message });
+//     }
+// });
+
 
 // -------------------- SET PASSWORD --------------------
 employeeRouter.patch('/set-password', async (req: Request, res: Response) => {
@@ -213,7 +284,7 @@ employeeRouter.get('/:employeeId', async (req: Request, res: Response) => {
 
         res.status(200).json({
             employeeId: employee.employeeId,
-            fullname: employee.fullname,
+            firstname: employee.firstname,
             email: employee.email,
             role: employee.role,
             department: employee.department,
@@ -323,6 +394,41 @@ employeeRouter.patch('/update-location/:employeeId', async (req: Request, res: R
     }
 });
 
+employeeRouter.patch("/update-identity", async (req: Request, res: Response) => {
+    try {
+        const { employeeId, panNumber } = req.body;
+
+        if (!employeeId || !panNumber) {
+            return res.status(400).json({ message: "EmployeeId and at least one of AadhaarNumber or PANNumber are required" });
+        }
+
+        if (panNumber && !/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(panNumber)) {
+            return res.status(400).json({ message: "PAN number must be valid (e.g., 5 letters + 4 digits + 1 letter)" });
+        }
+
+        const employee = await Employee.findByPk(employeeId);
+        if (!employee) {
+            return res.status(404).json({ message: "Employee not found" });
+        }
+
+        if (panNumber) employee.panNumber = panNumber;
+
+        await employee.save();
+
+        res.status(200).json({
+            message: "Identity details updated successfully",
+            employee: {
+                employeeId: employee.employeeId,
+                firstname: employee.firstname,
+                lastname: employee.lastname,
+                panNumber: employee.panNumber,
+            },
+        });
+    } catch (err) {
+        console.error("Error updating identity details:", err);
+        res.status(500).json({ message: "Internal Server Error", error: err });
+    }
+});
 
 
 export default employeeRouter;

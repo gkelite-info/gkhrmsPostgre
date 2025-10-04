@@ -4,7 +4,8 @@ import sequelizeConnection from "../config";
 
 interface employeeAttributes {
     employeeId: number;
-    fullname: string;
+    firstname: string;
+    lastname?: string;
     email: string;
     password: string;
     role: string;
@@ -15,18 +16,18 @@ interface employeeAttributes {
     location?: string | null;
     dateOfJoining?: Date | null;
     status?: string;
+    aadhaarNumber?: string | null;
     photoURL?: string | null;
-
     phone?: string | null;
     address?: string | null;
-
+    physicallyHandicapped?: "Yes" | "No" | null;
+    nationality?: string;
     gender: string | null;
     marital_status?: string | null;
-
     dob?: Date | null;
+    panNumber?: string | null;
     bloodGroup?: string | null;
     emergencyContact?: string | null;
-
     emailVerificationToken?: string | null;
     emailVerificationExpires?: Date | null;
     isEmailVerified?: boolean;
@@ -41,7 +42,8 @@ export interface employeeOutput extends Required<employeeAttributes> { }
 
 class Employee extends Model<employeeAttributes, employeeInput> implements employeeAttributes {
     public employeeId!: number;
-    public fullname!: string;
+    public firstname!: string;
+    public lastname!: string;
     public email!: string;
     public role!: string;
     public password!: string;
@@ -53,13 +55,14 @@ class Employee extends Model<employeeAttributes, employeeInput> implements emplo
     public dateOfJoining!: Date | null;
     public status!: string;
     public photoURL!: string | null;
-
     public phone!: string | null;
     public address!: string | null;
-
+    public nationality!: string;
+    public panNumber!: string | null;
+    public aadhaarNumber!: string | null;
+    public physicallyHandicapped!: "Yes" | "No" | null | undefined;
     public gender!: string | null;
     public marital_status!: string | null;
-
     public dob!: Date | null;
     public bloodGroup!: string | null;
     public emergencyContact!: string | null;
@@ -78,9 +81,13 @@ Employee.init({
         primaryKey: true,
         autoIncrement: true,
     },
-    fullname: {
+    firstname: {
         type: DataTypes.STRING(50),
         allowNull: false
+    },
+    lastname: {
+        type: DataTypes.STRING(50),
+        allowNull: true
     },
     email: {
         type: DataTypes.STRING(255),
@@ -115,6 +122,14 @@ Employee.init({
         allowNull: true,
         references: { model: 'employee', key: 'employeeId' }
     },
+    panNumber: {
+        type: DataTypes.STRING(10),
+        allowNull: true,
+        unique: true,
+        validate: {
+            len: [10, 10]
+        }
+    },
     location: {
         type: DataTypes.STRING(100),
         allowNull: true
@@ -138,6 +153,20 @@ Employee.init({
     address: {
         type: DataTypes.STRING(255),
         allowNull: true
+    },
+    nationality: {
+        type: DataTypes.STRING(50),
+        allowNull: true
+    },
+    physicallyHandicapped: {
+        type: DataTypes.ENUM("Yes", "No"),
+        allowNull: true
+    },
+    aadhaarNumber: {
+        type: DataTypes.STRING(12),
+        allowNull: true,
+        unique: true,
+        validate: { len: [12, 12] }
     },
     dob: {
         type: DataTypes.DATE,
