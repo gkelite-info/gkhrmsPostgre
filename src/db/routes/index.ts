@@ -7,6 +7,9 @@ import employeeProfileRouter from './employeeProfile';
 import employeeAddressRouter from './employeeAddress';
 import familyRouter from './familyRouter';
 import employeesRouter from './employeeRoutes';
+import assignedAssetsRouter from './assigned_assets';
+import requestedAssetsRouter from './requested_assets';
+import damagedAssetsRouter from './damaged_assets';
 
 const routes = express.Router();
 
@@ -17,6 +20,9 @@ routes.use('/employeeProfile', employeeProfileRouter);
 routes.use('/employeeAddress', employeeAddressRouter);
 routes.use('/family', familyRouter);
 routes.use(employeesRouter);
+routes.use('/assets', assignedAssetsRouter);
+routes.use('/assets', requestedAssetsRouter);
+routes.use('/assets', damagedAssetsRouter);
 
 routes.get('/profile', protectEmployee, async (req: any, res) => {
     try {
